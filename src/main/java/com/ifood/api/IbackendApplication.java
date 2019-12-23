@@ -3,11 +3,12 @@ package com.ifood.api;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+
 @SpringBootApplication
-public class IfoodBackendApiApplication {
+public class IbackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IfoodBackendApiApplication.class, args);
+		SpringApplication.run(IbackendApplication.class, args);
 	}
 
 }

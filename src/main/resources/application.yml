@@ -1,16 +1,14 @@
 server:
-  port: 8081
-  
+  port: 9091
 
 spring:
   profiles:
     active: dev
 
-
 ---
 spring:
   profiles: dev
-  
+
 ---
 spring:
   profiles: hom
