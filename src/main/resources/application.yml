@@ -4,6 +4,7 @@ server:
 spring:
   profiles:
     active: dev
+  session:    timeout: 3600
 
 ---
 spring:

@@ -24,7 +24,7 @@ class JsonResponseTest {
 	private void setUp() {
 		this.titulos.add(new Titulo("Première Gymnopédie", new Artista("Alexandre Tharaud"), new Album("Satie: Avant-dernières pensées (Bonus Track Version)")));
 		this.titulos.add(new Titulo("Ancient Airs & Dances, Suite No. 3, P. 172: I. Italiana", new Artista("Tonkünstler Orchester"), new Album("String Serenade")));
-		jsonResponse2 = new JsonResponse("brasilia", 31, "", new Tracks(this.titulos));
+		jsonResponse2 = new JsonResponse("brasilia", 31, "tracks for party", new Tracks(this.titulos));
 	}
 	
 	
@@ -36,7 +36,7 @@ class JsonResponseTest {
 		int hashCode1 = jsonResponse1.hashCode();
 		assertEquals(expected1, hashCode1);
 		
-		int expected2 = 1337230119;
+		int expected2 = 534777543;
 		int hashCode2 = jsonResponse2.hashCode();
 		assertEquals(expected2, hashCode2);
 	}
@@ -49,7 +49,7 @@ class JsonResponseTest {
 		String city_name1 = jsonResponse1.getCity_name();
 		assertEquals(expected1, city_name1);
 		
-		String expected2 = "Brasilia";
+		String expected2 = "brasilia";
 		String city_name2 = jsonResponse2.getCity_name();
 		assertEquals(expected2, city_name2);
 	}
@@ -162,7 +162,7 @@ class JsonResponseTest {
 		String string1 = jsonResponse1.toString();
 		assertEquals(expected1, string1);
 		
-		String expected2 = "JsonResponse(city_name=Brasilia, temperature=31, suggest_track=tracks for party, tracks=Tracks(data=[Titulo(title=Première Gymnopédie, artist=Artista(name=Alexandre Tharaud), album=Album(title=Satie: Avant-dernières pensées (Bonus Track Version))), Titulo(title=Ancient Airs & Dances, Suite No. 3, P. 172: I. Italiana, artist=Artista(name=Tonkünstler Orchester), album=Album(title=String Serenade))]))";
+		String expected2 = "JsonResponse(city_name=brasilia, temperature=31, suggest_track=tracks for party, tracks=Tracks(data=[Titulo(title=Première Gymnopédie, artist=Artista(name=Alexandre Tharaud), album=Album(title=Satie: Avant-dernières pensées (Bonus Track Version))), Titulo(title=Ancient Airs & Dances, Suite No. 3, P. 172: I. Italiana, artist=Artista(name=Tonkünstler Orchester), album=Album(title=String Serenade))]))";
 		String string2 = jsonResponse2.toString();
 		assertEquals(expected2, string2);
 	}
@@ -170,6 +170,7 @@ class JsonResponseTest {
 
 	@Test
 	void testJsonResponse() {
+		setUp();
 		assertNotNull(jsonResponse1);
 		assertNotNull(jsonResponse2);
 	}

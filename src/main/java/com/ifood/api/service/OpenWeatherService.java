@@ -1,11 +1,14 @@
 package com.ifood.api.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.ifood.api.error.CustomExeception;
 import com.ifood.api.model.JsonResponse;
 import com.ifood.api.model.Temperature;
 
+import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 public class OpenWeatherService {
@@ -57,9 +60,17 @@ public class OpenWeatherService {
 			.create()
 			.get()
 			.uri(urlComParametros)
-			.accept(MediaType.APPLICATION_JSON)
-			.exchange()
-			.flatMap(response -> response.bodyToMono(Temperature.class))
+			.retrieve()
+			.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new CustomExeception("Erro no cliente")))
+			.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomExeception("Erro no servidor")))
+			.bodyToMono(Temperature.class)
+			.doOnSuccess(value -> {
+				city_name = value.getName();
+				temperature = value.getMain().getTemp();
+			})
+			// .accept(MediaType.APPLICATION_JSON)
+			// .exchange()
+			// .flatMap(response -> response.bodyToMono(Temperature.class))
 			.log(" getPlayListId :: ");
 		
 		flatMap.subscribe(value -> {
@@ -70,23 +81,38 @@ public class OpenWeatherService {
 		String suggestTrack = BusinessRulesService.suggestTrack(temperature);
 		String playlistId = BusinessRulesService.getPlaylistIdBySuggestTrack(suggestTrack);
 		
-		// Obter playlist 
-		Mono<JsonResponse> bodyToFlux = WebClient
-				.create()
-				.get()
-				.uri("https://deezerdevs-deezer.p.rapidapi.com/playlist/" + playlistId)
-				.header("X-RapidAPI-Key", "40960e6417mshaf5daaab06d5058p1d915ejsn8d7f918a6626")
-				.header("x-rapidapi-host", "deezerdevs-deezer.p.rapidapi.com")
-				.retrieve()
-				.bodyToMono(JsonResponse.class)
-				.doOnSuccess(element -> {
-					element.setCity_name(city_name);
-					element.setTemperature(temperature);
-					element.setSuggest_track(suggestTrack);
-				})
-				.log(" getPlaylistTracks :: ");
-			
-		return bodyToFlux;
+		if(city_name != null && temperature != 0) {
+			// Obter playlist 
+			Mono<JsonResponse> bodyMono = WebClient
+					.create()
+					.get()
+					.uri("https://deezerdevs-deezer.p.rapidapi.com/playlist/" + playlistId)
+					.header("X-RapidAPI-Key", "40960e6417mshaf5daaab06d5058p1d915ejsn8d7f918a6626")
+					.header("x-rapidapi-host", "deezerdevs-deezer.p.rapidapi.com")
+					.retrieve()
+					.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new CustomExeception("Erro no cliente")))
+					.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomExeception("Erro no servidor")))
+					.bodyToMono(JsonResponse.class)
+					.doOnSuccess(element -> {
+						element.setCity_name(city_name);
+						element.setTemperature(temperature);
+						element.setSuggest_track(suggestTrack);
+					})
+					.log(" getPlaylistTracks :: ");
+				
+			return bodyMono;
+		}else {
+			return new Mono<JsonResponse>() {
+
+				@Override
+				public void subscribe(CoreSubscriber<? super JsonResponse> actual) {
+					// TODO Auto-generated method stub
+				}
+				
+			};
+		}
+		
+		
 	}
 	
 	
