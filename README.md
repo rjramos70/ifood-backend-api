@@ -17,9 +17,16 @@ Application developed in Java 8, Spring Boot, WebFlux with JUnit as a test frame
 	5 - Build the project by right-clicking > Run As > Maven Build ... > in the 'Goals' field fill in with 'clean package' and then clicking on the 'Run' button;
 
 
-### Run the Project
+### Run the Project using IDE
 
 To run the project right click on the project name > Run As > Spring Boot App.
+
+
+### Run the Project using JAR file
+
+After installing and running the project, access the project target folder via command prompt and run the following command:
+
+	java –jar –Dspring.profiles.active = dese ifood-backend-api-0.0.1-SNAPSHOT.jar
 
 
 ## Test the Project
