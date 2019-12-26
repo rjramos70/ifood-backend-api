@@ -11,46 +11,43 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.ifood.api.constants.ApplicationConstants;
 
-// @RunWith(SpringRunner.class)
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(PlaylistControllerImpl.class)
 @ContextConfiguration(classes = {
 		PlaylistControllerImpl.class
 })
-// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// @AutoConfigureWebTestClient(timeout = "10000")//10 seconds
 class PlaylistControllerImplTest {
 	
 	@Autowired
 	private WebTestClient webTestClient;
 	
 
-//	@Test
-//	void testGetPlaylistByCityName() {
-//		
-//		webTestClient
-//			.get()
-//			.uri(ApplicationConstants.API_END_POINT.concat("/playlist/{city_name}"), "Shuzenji")
-//			.exchange()
-//			.expectStatus().isOk()
-//			.expectBody()
-////			.jsonPath("$.name", "Shuzenji");
-//			.consumeWith(response -> 
-//				Assertions.assertThat(response.getResponseBody()).isNotNull()
-//			);
-//			
-//		
-//	}
-//
-//	@Test
-//	void testGetPlaylistByLatitudeLongitude() {
-//		webTestClient
-//		.get()
-//		.uri(ApplicationConstants.API_END_POINT.concat("/playlist/{lat}/{lon}"), "35", "139")
-//		.exchange()
-//		.expectStatus().isOk()
-//		.expectBody()
-//		.jsonPath("$.suggest_track", "classic music tracks");
-//	}
+	@Test
+	void testGetPlaylistByCityName() {
+		
+		webTestClient
+			.get()
+			.uri(ApplicationConstants.API_END_POINT.concat("/playlist/{city_name}"), "Shuzenji")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody()
+//			.jsonPath("$.name", "Shuzenji");
+			.consumeWith(response -> 
+				Assertions.assertThat(response.getResponseBody()).isNotNull()
+			);
+			
+		
+	}
+
+	@Test
+	void testGetPlaylistByLatitudeLongitude() {
+		webTestClient
+		.get()
+		.uri(ApplicationConstants.API_END_POINT.concat("/playlist/{lat}/{lon}"), "35", "139")
+		.exchange()
+		.expectStatus().isOk()
+		.expectBody()
+		.jsonPath("$.suggest_track", "classic music tracks");
+	}
 
 }

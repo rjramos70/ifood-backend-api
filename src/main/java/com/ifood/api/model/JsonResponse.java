@@ -11,6 +11,8 @@ public class JsonResponse {
 
 	private String city_name;
 	private Integer temperature;
+	private float latitude;
+	private float longitude;
 	private String suggest_track;
 	private Tracks tracks;
 	

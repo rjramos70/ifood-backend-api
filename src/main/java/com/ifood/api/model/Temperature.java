@@ -11,4 +11,5 @@ public class Temperature {
 
 	private Main main;
 	private String name;
+	private Coordinates coord;
 }

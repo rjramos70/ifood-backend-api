@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CustomExeception extends Throwable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private String message;
 	
 

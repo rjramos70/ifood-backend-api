@@ -31,7 +31,7 @@ public class BusinessRulesService {
 		}
 	}
 	
-	public static String suggestTrack(int temperature) {
+	public static String getSuggestTrack(int temperature) {
 		load();
 		
 		String result = null;
@@ -47,8 +47,13 @@ public class BusinessRulesService {
 		return result;
 	}
 	
-	public static String getPlaylistIdBySuggestTrack(String suggestTrack) {
-		return playlistIds.get(suggestTrack);
+	public static String getPlaylistIdByTemperature(int temperature) {
+		load();
+		return playlistIds.get(getSuggestTrack(temperature));
 	}
+	
+//	public static String getPlaylistIdBySuggestTrack(String suggestTrack) {
+//		return playlistIds.get(suggestTrack);
+//	}
 	
 }

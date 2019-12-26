@@ -24,19 +24,20 @@ class JsonResponseTest {
 	private void setUp() {
 		this.titulos.add(new Titulo("Première Gymnopédie", new Artista("Alexandre Tharaud"), new Album("Satie: Avant-dernières pensées (Bonus Track Version)")));
 		this.titulos.add(new Titulo("Ancient Airs & Dances, Suite No. 3, P. 172: I. Italiana", new Artista("Tonkünstler Orchester"), new Album("String Serenade")));
-		jsonResponse2 = new JsonResponse("brasilia", 31, "tracks for party", new Tracks(this.titulos));
+		jsonResponse2 = new JsonResponse("brasilia", 31, -10.9f, -37.55f, "tracks for party", new Tracks(this.titulos));
 	}
+	
 	
 	
 	@Test
 	void testHashCode() {
 		setUp();
 		
-		int expected1 = 21100921;
+		int expected1 = 428883569;
 		int hashCode1 = jsonResponse1.hashCode();
 		assertEquals(expected1, hashCode1);
 		
-		int expected2 = 534777543;
+		int expected2 = -391528740;
 		int hashCode2 = jsonResponse2.hashCode();
 		assertEquals(expected2, hashCode2);
 	}
@@ -158,11 +159,11 @@ class JsonResponseTest {
 	void testToString() {
 		setUp();
 		
-		String expected1 = "JsonResponse(city_name=null, temperature=null, suggest_track=null, tracks=null)";
+		String expected1 = "JsonResponse(city_name=null, temperature=null, latitude=0.0, longitude=0.0, suggest_track=null, tracks=null)";
 		String string1 = jsonResponse1.toString();
 		assertEquals(expected1, string1);
 		
-		String expected2 = "JsonResponse(city_name=brasilia, temperature=31, suggest_track=tracks for party, tracks=Tracks(data=[Titulo(title=Première Gymnopédie, artist=Artista(name=Alexandre Tharaud), album=Album(title=Satie: Avant-dernières pensées (Bonus Track Version))), Titulo(title=Ancient Airs & Dances, Suite No. 3, P. 172: I. Italiana, artist=Artista(name=Tonkünstler Orchester), album=Album(title=String Serenade))]))";
+		String expected2 = "JsonResponse(city_name=brasilia, temperature=31, latitude=-10.9, longitude=-37.55, suggest_track=tracks for party, tracks=Tracks(data=[Titulo(title=Première Gymnopédie, artist=Artista(name=Alexandre Tharaud), album=Album(title=Satie: Avant-dernières pensées (Bonus Track Version))), Titulo(title=Ancient Airs & Dances, Suite No. 3, P. 172: I. Italiana, artist=Artista(name=Tonkünstler Orchester), album=Album(title=String Serenade))]))";
 		String string2 = jsonResponse2.toString();
 		assertEquals(expected2, string2);
 	}

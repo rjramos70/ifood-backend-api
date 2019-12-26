@@ -1,29 +1,30 @@
 package com.ifood.api.service;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.ifood.api.error.CustomExeception;
 import com.ifood.api.model.JsonResponse;
 import com.ifood.api.model.Temperature;
 
-import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+@Service
 public class OpenWeatherService {
 	
 	// Por nome da cidade
 	// http://api.openweathermap.org/data/2.5/weather?q=Rio de Janeiro&units=metric&APPID=4fe8ce47347a8b26a85294ded4bf0f35
 	
-	private final static String API_MAIN_PATH = "http://api.openweathermap.org/data/2.5/weather?";
-	private final static String UNIT_AND_APPID = "&units=metric&APPID=4fe8ce47347a8b26a85294ded4bf0f35";
+	private final String API_MAIN_PATH = "http://api.openweathermap.org/data/2.5/weather?";
+	private final String UNIT_AND_APPID = "&units=metric&appid=4fe8ce47347a8b26a85294ded4bf0f35";
 	
 	// por latitude e longitude
 	// http://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&units=metric&APPID=4fe8ce47347a8b26a85294ded4bf0f35
 	
-	private static int temperature;
-	private static String city_name;
+	private int temperature;
+	private String city_name;
 	
 
 	/**
@@ -31,7 +32,7 @@ public class OpenWeatherService {
 	 * @param city_name
 	 * @return Mono<JsonResponse>
 	 */
-	public static Mono<JsonResponse> getPlaylistByCityName(String city_name){
+	public Mono<JsonResponse> getPlaylistByCityName(String city_name){
 		
 		return getPlayListId(getUrlByCityName(city_name));
 	}
@@ -42,7 +43,7 @@ public class OpenWeatherService {
 	 * @param longitude
 	 * @return Mono<JsonResponse>
 	 */
-	public static Mono<JsonResponse> getPlaylistByLatitudeLongitude(String latitude, String longitude){
+	public Mono<JsonResponse> getPlaylistByLatitudeLongitude(String latitude, String longitude){
 		
 		return getPlayListId(getUrlByLatitudeAndLongitude(latitude, longitude));
 	}
@@ -53,65 +54,41 @@ public class OpenWeatherService {
 	 * @param urlComParametros
 	 * @return Mono<JsonResponse>
 	 */
-	private static Mono<JsonResponse> getPlayListId(String urlComParametros) {
-
+	private Mono<JsonResponse> getPlayListId(String urlComParametros) {
 		// Obter cidade e temperatura
-		Mono<Temperature> flatMap = WebClient
+		Mono<JsonResponse> responseMono = WebClient
 			.create()
 			.get()
+			//.uri("/weather?q={city_name}&units=metric&APPID=4fe8ce47347a8b26a85294ded4bf0f35", "Brasilia")
 			.uri(urlComParametros)
 			.retrieve()
 			.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new CustomExeception("Erro no cliente")))
 			.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomExeception("Erro no servidor")))
 			.bodyToMono(Temperature.class)
-			.doOnSuccess(value -> {
-				city_name = value.getName();
-				temperature = value.getMain().getTemp();
+			.publishOn(Schedulers.elastic())
+			.flatMap(retorno -> {
+				// get the playlist base on temperature
+				return WebClient
+						.create()
+						.get()
+						.uri("https://deezerdevs-deezer.p.rapidapi.com/playlist/" + BusinessRulesService.getPlaylistIdByTemperature(retorno.getMain().getTemp()))
+						.header("X-RapidAPI-Key", "40960e6417mshaf5daaab06d5058p1d915ejsn8d7f918a6626")
+						.header("x-rapidapi-host", "deezerdevs-deezer.p.rapidapi.com")
+						.retrieve()
+						.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new CustomExeception("Erro no cliente")))
+						.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomExeception("Erro no servidor")))
+						.bodyToMono(JsonResponse.class)
+						.doOnSuccess(element -> {
+							element.setCity_name(retorno.getName());
+							element.setTemperature(retorno.getMain().getTemp());
+							element.setLatitude(retorno.getCoord().getLat());
+							element.setLongitude(retorno.getCoord().getLon());
+							element.setSuggest_track(BusinessRulesService.getSuggestTrack(retorno.getMain().getTemp()));
+						});
 			})
-			// .accept(MediaType.APPLICATION_JSON)
-			// .exchange()
-			// .flatMap(response -> response.bodyToMono(Temperature.class))
-			.log(" getPlayListId :: ");
+			.log(" playlist :: ");
 		
-		flatMap.subscribe(value -> {
-			city_name = value.getName();
-			temperature = value.getMain().getTemp();
-		});
-		
-		String suggestTrack = BusinessRulesService.suggestTrack(temperature);
-		String playlistId = BusinessRulesService.getPlaylistIdBySuggestTrack(suggestTrack);
-		
-		if(city_name != null && temperature != 0) {
-			// Obter playlist 
-			Mono<JsonResponse> bodyMono = WebClient
-					.create()
-					.get()
-					.uri("https://deezerdevs-deezer.p.rapidapi.com/playlist/" + playlistId)
-					.header("X-RapidAPI-Key", "40960e6417mshaf5daaab06d5058p1d915ejsn8d7f918a6626")
-					.header("x-rapidapi-host", "deezerdevs-deezer.p.rapidapi.com")
-					.retrieve()
-					.onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new CustomExeception("Erro no cliente")))
-					.onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new CustomExeception("Erro no servidor")))
-					.bodyToMono(JsonResponse.class)
-					.doOnSuccess(element -> {
-						element.setCity_name(city_name);
-						element.setTemperature(temperature);
-						element.setSuggest_track(suggestTrack);
-					})
-					.log(" getPlaylistTracks :: ");
-				
-			return bodyMono;
-		}else {
-			return new Mono<JsonResponse>() {
-
-				@Override
-				public void subscribe(CoreSubscriber<? super JsonResponse> actual) {
-					// TODO Auto-generated method stub
-				}
-				
-			};
-		}
-		
+		return responseMono;
 		
 	}
 	
@@ -121,7 +98,7 @@ public class OpenWeatherService {
 	 * @param city_name
 	 * @return String
 	 */
-	private static String getUrlByCityName(String city_name) {
+	private String getUrlByCityName(String city_name) {
 		
 		return API_MAIN_PATH.concat("q=").concat(city_name).concat(UNIT_AND_APPID);
 	}
@@ -132,8 +109,30 @@ public class OpenWeatherService {
 	 * @param lon
 	 * @return String
 	 */
-	private static String getUrlByLatitudeAndLongitude(String lat, String lon) {
+	private String getUrlByLatitudeAndLongitude(String lat, String lon) {
 		
 		return API_MAIN_PATH.concat("lat=").concat(lat).concat("&lon=").concat(lon).concat(UNIT_AND_APPID);
 	}
+
+	public int getTemperature() {
+		return temperature;
+	}
+
+	public void setTemperature(int temperature) {
+		this.temperature = temperature;
+	}
+
+	public String getCity_name() {
+		return city_name;
+	}
+
+	public void setCity_name(String city_name) {
+		this.city_name = city_name;
+	}
+
+	
+
 }
+
+
+

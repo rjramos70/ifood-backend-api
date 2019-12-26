@@ -19,16 +19,18 @@ import reactor.core.publisher.Mono;
 public class PlaylistControllerImpl implements PlaylistController{
 
 	
+	private OpenWeatherService openWeatherService = new OpenWeatherService();
+	
 	@GetMapping("/playlist/{city_name}")
 	public Mono<JsonResponse> getPlaylistByCityName(@PathVariable String city_name){
 
-		return OpenWeatherService.getPlaylistByCityName(city_name);
+		return openWeatherService.getPlaylistByCityName(city_name);
 	}
 	
 	@GetMapping("/playlist/{lat}/{lon}")
 	public Mono<JsonResponse> getPlaylistByLatitudeLongitude(@PathVariable String lat, @PathVariable String lon){
 		
-		return OpenWeatherService.getPlaylistByLatitudeLongitude(lat, lon);
+		return openWeatherService.getPlaylistByLatitudeLongitude(lat, lon);
 
 	}
 	
